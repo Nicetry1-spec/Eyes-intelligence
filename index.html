@@ -4,1329 +4,674 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Eyes Intelligence</title>
-<meta name="description" content="Discord Intelligence Platform — Deep analysis, tracking, and OSINT">
-<meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
 <style>
-:root {
-  --bg: #09090b;
-  --bg2: #111113;
-  --bg3: #18181b;
-  --bg4: #1f1f23;
-  --border: #27272a;
-  --border2: #3f3f46;
-  --text: #fafafa;
-  --text2: #a1a1aa;
-  --text3: #71717a;
-  --accent: #8b5cf6;
-  --accent2: #7c3aed;
-  --accent-glow: rgba(139, 92, 246, 0.15);
-  --green: #22c55e;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --yellow: #eab308;
-  --orange: #f97316;
-  --sidebar-w: 260px;
+:root{
+  --bg:#0c0c0e;--bg2:#131316;--bg3:#1a1a1f;--bg4:#222228;
+  --border:#2a2a30;--border2:#3a3a42;
+  --text:#f0f0f0;--text2:#9a9aa0;--text3:#5a5a64;
+  --accent:#8b5cf6;--accent2:#7c3aed;--accent-dim:rgba(139,92,246,.12);
+  --green:#22c55e;--red:#ef4444;--yellow:#eab308;--blue:#3b82f6;--orange:#f97316;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-a { color: var(--accent); text-decoration: none; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-#particles {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 0;
-  pointer-events: none;
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:48px;
+  background:rgba(12,12,14,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 16px;gap:0;
 }
+.topbar-nav{display:flex;height:100%}
+.topbar-nav a{
+  display:flex;align-items:center;gap:6px;padding:0 16px;
+  font-size:13px;font-weight:500;color:var(--text2);
+  border-bottom:2px solid transparent;height:100%;
+  transition:color .15s;
+}
+.topbar-nav a:hover{color:var(--text)}
+.topbar-nav a.active{color:var(--text);border-bottom-color:var(--accent)}
+.topbar-nav a svg{width:15px;height:15px;opacity:.7}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.credits{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--yellow)}
+.credits svg{width:14px;height:14px}
+.user-pill{
+  display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:20px;cursor:pointer;
+}
+.user-pill .av{width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.user-pill span{font-size:12px;font-weight:600;color:var(--text2)}
 
-.topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 52px;
-  background: rgba(9,9,11,0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:48px;left:0;width:200px;height:calc(100vh - 48px);
+  background:var(--bg2);border-right:1px solid var(--border);z-index:90;
+  display:flex;flex-direction:column;padding:12px 8px;overflow-y:auto;
 }
-.topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text);
-  width: var(--sidebar-w);
+.sidebar .brand{
+  display:flex;align-items:center;gap:8px;padding:8px 10px 16px;
 }
-.topbar-brand svg { width: 22px; height: 22px; color: var(--accent); }
-.topbar-nav {
-  display: flex;
-  gap: 0;
-  flex: 1;
+.sidebar .brand-icon{
+  width:36px;height:36px;border-radius:10px;background:var(--bg4);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
 }
-.topbar-nav a {
-  padding: 14px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: color .15s;
-  border-bottom: 2px solid transparent;
-}
-.topbar-nav a:hover, .topbar-nav a.active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
-.topbar-nav a svg { width: 16px; height: 16px; }
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-left: auto;
-}
-.credits {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--yellow);
-}
-.credits svg { width: 14px; height: 14px; }
-.user-badge {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-  cursor: pointer;
-}
+.sidebar .brand-icon svg{width:20px;height:20px;color:var(--accent)}
+.sidebar .brand-text h3{font-size:14px;font-weight:700}
+.sidebar .brand-text p{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px}
 
-.sidebar {
-  position: fixed;
-  top: 52px;
-  left: 0;
-  width: var(--sidebar-w);
-  height: calc(100vh - 52px);
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-  padding: 16px 12px;
-  gap: 6px;
-  overflow-y: auto;
+.sb-cat{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--text3);padding:12px 10px 6px;
 }
-.sidebar-section {
-  margin-bottom: 8px;
+.sb-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+  cursor:pointer;transition:background .12s;font-size:13px;font-weight:500;color:var(--text2);
 }
-.sidebar-section-title {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text3);
-  padding: 8px 12px 6px;
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.active{background:var(--accent-dim);color:var(--text)}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;width:3px;height:18px;
+  background:var(--accent);border-radius:0 3px 3px 0;
 }
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background .15s;
-  position: relative;
+.sb-item{position:relative}
+.sb-icon{
+  width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.sidebar-item:hover { background: var(--bg3); }
-.sidebar-item.active { background: var(--accent-glow); }
-.sidebar-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 50%;
-  transform: translateY(-50%);
-  width: 3px; height: 20px;
-  background: var(--accent);
-  border-radius: 0 3px 3px 0;
-}
-.sidebar-icon {
-  width: 34px; height: 34px;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.sidebar-icon svg { width: 18px; height: 18px; }
-.sidebar-icon.discord { background: #5865f2; color: #fff; }
-.sidebar-icon.recon { background: var(--green); color: #fff; }
-.sidebar-icon.threat { background: var(--red); color: #fff; }
-.sidebar-icon.surveillance { background: var(--orange); color: #fff; }
-.sidebar-icon.doxx { background: var(--accent); color: #fff; }
-.sidebar-item-text h4 {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-.sidebar-item-text p {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 1px;
-}
-.sidebar-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--accent);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background .15s;
-  margin-top: 2px;
-}
-.sidebar-btn:hover { background: var(--bg3); }
-.sidebar-btn svg { width: 14px; height: 14px; }
-.sidebar-bottom {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.sidebar-bottom a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  font-size: 12px;
-  color: var(--text3);
-  border-radius: 6px;
-  transition: all .15s;
-}
-.sidebar-bottom a:hover { color: var(--text2); background: var(--bg3); }
-.sidebar-bottom a svg { width: 16px; height: 16px; }
+.sb-icon svg{width:16px;height:16px}
+.sb-icon.i-discord{background:#5865f2;color:#fff}
+.sb-icon.i-recon{background:var(--green);color:#fff}
+.sb-icon.i-threat{background:var(--red);color:#fff}
+.sb-icon.i-surv{background:var(--orange);color:#fff}
+.sb-icon.i-doxx{background:var(--accent);color:#fff}
 
-.content {
-  margin-left: var(--sidebar-w);
-  margin-top: 52px;
-  position: relative;
-  z-index: 1;
-  min-height: calc(100vh - 52px);
+.sb-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin:6px 4px;padding:9px;border-radius:8px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s;
+}
+.sb-btn:hover{border-color:var(--accent);color:var(--text)}
+.sb-btn svg{width:14px;height:14px}
+
+.sidebar-bottom{
+  margin-top:auto;padding-top:10px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:10px;
+}
+.sidebar-bottom a{color:var(--text3);transition:color .15s}
+.sidebar-bottom a:hover{color:var(--text2)}
+.sidebar-bottom a svg{width:18px;height:18px}
+.sidebar-bottom .ver{font-size:10px;color:var(--text3)}
+
+/* ── CONTENT ── */
+.content{margin-left:200px;margin-top:48px;position:relative;z-index:1;min-height:calc(100vh - 48px)}
+.page{display:none}.page.active{display:block}
+
+/* ── CANVAS ── */
+#particles{position:fixed;top:0;left:200px;right:0;bottom:0;z-index:0;pointer-events:none}
+
+/* ── LOOKUP ── */
+.lookup-center{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 48px);padding:20px;position:relative;z-index:1;
+}
+.lookup-center h1{
+  font-size:38px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;
+  color:var(--text);
+}
+.lookup-center .sub{font-size:15px;color:var(--text2);margin-bottom:32px}
+.search-bar{
+  display:flex;align-items:center;width:100%;max-width:560px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;transition:border-color .2s,box-shadow .2s;
+}
+.search-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.search-bar svg.si{width:18px;height:18px;color:var(--text3);margin:0 14px;flex-shrink:0}
+.search-bar input{
+  flex:1;padding:14px 0;background:transparent;border:none;color:var(--text);
+  font-size:15px;outline:none;
+}
+.search-bar input::placeholder{color:var(--text3)}
+.search-bar button{
+  padding:10px 16px;margin:4px;background:var(--bg4);border:1px solid var(--border);
+  border-radius:8px;color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
+}
+.search-bar button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.feat-tabs{display:flex;gap:28px;margin-top:36px}
+.feat-tab{
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  color:var(--text3);transition:color .15s;
+}
+.feat-tab:hover{color:var(--text2)}
+.feat-tab.active{color:var(--text)}
+.feat-tab svg{width:22px;height:22px}
+.feat-tab span{font-size:11px;font-weight:500}
+
+/* ── PROFILE (results) ── */
+.profile-page{
+  max-width:960px;margin:0 auto;padding:28px 24px;display:none;position:relative;z-index:1;
+}
+.profile-page.visible{display:block}
+
+.profile-head{
+  display:flex;align-items:center;gap:24px;padding:28px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;margin-bottom:24px;
+}
+.p-avatar{
+  width:90px;height:90px;border-radius:50%;object-fit:cover;
+  border:3px solid var(--border2);background:var(--bg3);
+}
+.p-info{flex:1}
+.p-info h2{font-size:26px;font-weight:800}
+.p-info .p-display{font-size:14px;color:var(--text2);margin-top:2px}
+.p-info .p-id{
+  font-size:12px;color:var(--text3);font-family:monospace;margin-top:4px;
+  display:flex;align-items:center;gap:6px;
+}
+.p-id .copy-btn{
+  background:none;border:none;color:var(--text3);cursor:pointer;padding:2px;
+}
+.p-id .copy-btn:hover{color:var(--accent)}
+.p-id .copy-btn svg{width:14px;height:14px}
+.p-badges{display:flex;gap:6px;margin-top:8px}
+.p-badges .badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;
+  text-transform:uppercase;background:var(--bg4);border:1px solid var(--border);color:var(--text2);
 }
 
-.page { display: none; }
-.page.active { display: block; }
+.p-stats{display:flex;gap:16px;margin-left:auto}
+.p-stat-box{
+  text-align:center;padding:14px 20px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;min-width:100px;
+}
+.p-stat-box .num{font-size:22px;font-weight:800}
+.p-stat-box .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
 
-/* LOOKUP PAGE */
-.lookup-hero {
-  text-align: center;
-  padding: 80px 20px 40px;
-  position: relative;
+.p-actions{display:flex;gap:10px;margin-bottom:24px}
+.p-action-btn{
+  display:flex;align-items:center;gap:6px;padding:9px 16px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s;
 }
-.lookup-hero h1 {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.lookup-hero p {
-  font-size: 16px;
-  color: var(--text2);
-  margin-bottom: 36px;
-}
-.search-container {
-  max-width: 620px;
-  margin: 0 auto;
-  position: relative;
-}
-.search-container input {
-  width: 100%;
-  padding: 16px 56px 16px 48px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-.search-container input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-.search-container input::placeholder { color: var(--text3); }
-.search-container .search-icon {
-  position: absolute;
-  left: 16px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text3);
-  width: 20px; height: 20px;
-}
-.search-container button {
-  position: absolute;
-  right: 6px; top: 50%;
-  transform: translateY(-50%);
-  width: 40px; height: 40px;
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
-}
-.search-container button:hover { background: var(--accent2); }
-.search-container button svg { width: 18px; height: 18px; }
+.p-action-btn:hover{border-color:var(--accent);color:var(--text)}
+.p-action-btn svg{width:15px;height:15px}
 
-.feature-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  margin-top: 40px;
+/* ── PROFILE SIDEBAR (inside profile view) ── */
+.profile-layout{display:flex;gap:0}
+.profile-sidebar{
+  width:180px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;
+  padding-right:20px;border-right:1px solid var(--border);
 }
-.feature-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 12px 16px;
-  border-radius: 10px;
-  transition: background .15s;
-  color: var(--text2);
+.ps-btn{
+  display:flex;align-items:center;gap:8px;padding:9px 12px;
+  border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .12s;width:100%;background:none;border:none;text-align:left;
 }
-.feature-tab:hover { background: var(--bg3); color: var(--text); }
-.feature-tab.active { color: var(--accent); }
-.feature-tab svg { width: 24px; height: 24px; }
-.feature-tab span { font-size: 12px; font-weight: 500; }
+.ps-btn:hover{background:var(--bg3);color:var(--text)}
+.ps-btn.active{background:var(--accent-dim);color:var(--text)}
+.ps-btn svg{width:16px;height:16px;opacity:.6}
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 800px;
-  margin: 48px auto 0;
-  padding: 0 20px;
-}
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-.stat-card .num {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.stat-card .label {
-  font-size: 12px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+.profile-main{flex:1;padding-left:20px;min-height:300px}
 
-/* PROFILE CARD */
-.profile-section {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 30px 20px;
-  display: none;
-}
-.profile-section.visible { display: block; }
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 24px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  margin-bottom: 20px;
-}
-.profile-avatar {
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: var(--bg3);
-  border: 3px solid var(--accent);
-  object-fit: cover;
-}
-.profile-info h2 {
-  font-size: 22px;
-  font-weight: 700;
-}
-.profile-info .uid {
-  font-size: 13px;
-  color: var(--text3);
-  font-family: 'Courier New', monospace;
-  margin-top: 2px;
-}
-.profile-stats {
-  display: flex;
-  gap: 24px;
-  margin-top: 10px;
-}
-.profile-stat {
-  text-align: center;
-}
-.profile-stat .val {
-  font-size: 18px;
-  font-weight: 700;
-}
-.profile-stat .lbl {
-  font-size: 11px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-.profile-badge {
-  margin-left: auto;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.badge-online { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-offline { background: rgba(113,113,122,0.15); color: var(--text3); }
+/* ── TAB CONTENT ── */
+.tab-panel{display:none}.tab-panel.active{display:block}
 
-.profile-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-  overflow-x: auto;
+.section-title{
+  display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;
+  margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
 }
-.profile-tab {
-  padding: 12px 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: all .15s;
-}
-.profile-tab:hover { color: var(--text); }
-.profile-tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+.section-title svg{width:18px;height:18px;color:var(--accent)}
 
-.msg-list { display: flex; flex-direction: column; gap: 4px; }
-.msg-item {
-  padding: 10px 14px;
-  background: var(--bg2);
-  border-radius: 8px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  font-size: 14px;
-  transition: background .15s;
+.data-row{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  border-radius:8px;transition:background .12s;font-size:13px;
 }
-.msg-item:hover { background: var(--bg3); }
-.msg-time {
-  font-size: 11px;
-  color: var(--text3);
-  white-space: nowrap;
-  min-width: 70px;
-  padding-top: 2px;
-}
-.msg-guild {
-  font-size: 11px;
-  color: var(--accent);
-  background: var(--accent-glow);
-  padding: 2px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.msg-content { color: var(--text); flex: 1; word-break: break-word; }
-.msg-deleted { color: var(--red); text-decoration: line-through; opacity: 0.7; }
+.data-row:hover{background:var(--bg3)}
+.data-row+.data-row{border-top:1px solid rgba(255,255,255,.03)}
 
-.name-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--bg2);
-  border-radius: 8px;
-}
-.name-item .old { color: var(--text3); }
-.name-item .arrow { color: var(--text3); }
-.name-item .new { color: var(--text); font-weight: 600; }
-.name-item .date { margin-left: auto; font-size: 11px; color: var(--text3); }
+.data-row .av-sm{width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--bg4)}
+.data-row .name{font-weight:600;flex:1}
+.data-row .meta{color:var(--text3);font-size:12px}
+.data-row .val{font-weight:600;color:var(--text)}
 
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 10px;
+.msg-item{
+  padding:10px 14px;display:flex;gap:12px;align-items:flex-start;font-size:13px;
+  border-radius:6px;transition:background .12s;
 }
-.avatar-grid img {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 10px;
-  object-fit: cover;
-  cursor: pointer;
-  border: 2px solid var(--border);
-  transition: border-color .15s, transform .15s;
+.msg-item:hover{background:var(--bg3)}
+.msg-time{font-size:11px;color:var(--text3);white-space:nowrap;min-width:68px;padding-top:1px}
+.msg-guild{
+  font-size:10px;color:var(--accent);background:var(--accent-dim);
+  padding:2px 7px;border-radius:4px;white-space:nowrap;font-weight:600;
 }
-.avatar-grid img:hover {
-  border-color: var(--accent);
-  transform: scale(1.05);
+.msg-text{color:var(--text);flex:1;word-break:break-word;line-height:1.4}
+
+.voice-tag{
+  display:inline-block;padding:3px 8px;border-radius:4px;
+  font-size:10px;font-weight:700;text-transform:uppercase;
+}
+.voice-tag.join{background:rgba(34,197,94,.12);color:var(--green)}
+.voice-tag.leave{background:rgba(239,68,68,.12);color:var(--red)}
+.voice-tag.mute,.voice-tag.unmute,.voice-tag.deafen,.voice-tag.undeafen{background:rgba(234,179,8,.12);color:var(--yellow)}
+.voice-tag.stream_start,.voice-tag.stream_stop,.voice-tag.camera_on,.voice-tag.camera_off{background:rgba(59,130,246,.12);color:var(--blue)}
+
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.online{background:var(--green)}.status-dot.idle{background:var(--yellow)}
+.status-dot.dnd{background:var(--red)}.status-dot.offline{background:var(--text3)}
+
+.avatar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.avatar-grid img{
+  width:100%;aspect-ratio:1;border-radius:10px;object-fit:cover;cursor:pointer;
+  border:2px solid var(--border);transition:border-color .15s,transform .15s;
+}
+.avatar-grid img:hover{border-color:var(--accent);transform:scale(1.06)}
+
+.empty-msg{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .5s linear infinite;margin:20px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── DOXX PAGE ── */
+.doxx-inner{max-width:900px;margin:0 auto;padding:28px 24px}
+.doxx-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.doxx-top h2{font-size:22px;font-weight:700}
+.doxx-add{
+  display:flex;align-items:center;gap:6px;padding:9px 18px;
+  background:var(--accent);border:none;border-radius:8px;color:#fff;
+  font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;
+}
+.doxx-add:hover{background:var(--accent2)}
+.doxx-add svg{width:15px;height:15px}
+.doxx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.doxx-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:18px;cursor:pointer;transition:border-color .15s,transform .15s;
+}
+.doxx-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.doxx-card h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.doxx-card .dc-id{font-size:11px;color:var(--text3);font-family:monospace;margin-bottom:10px}
+.doxx-card .dc-field{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.doxx-card .dc-field:last-child{border:none}
+.doxx-card .dc-field .k{color:var(--text3)}.doxx-card .dc-field .v{color:var(--text);font-weight:500}
+.doxx-card .dc-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:var(--text3)}
+.doxx-card .dc-tag{
+  font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:4px;
+  background:rgba(239,68,68,.12);color:var(--red);
 }
 
-.server-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--bg2);
-  border-radius: 8px;
+/* ── MODAL ── */
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;
+  align-items:center;justify-content:center;
 }
-.server-item .sname { font-weight: 600; }
-.server-item .seen { margin-left: auto; font-size: 11px; color: var(--text3); }
+.modal-bg.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  width:90%;max-width:480px;padding:24px;
+}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:18px}
+.modal label{display:block;font-size:11px;font-weight:600;color:var(--text3);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
+.modal input,.modal textarea{
+  width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:13px;outline:none;font-family:inherit;
+}
+.modal input:focus,.modal textarea:focus{border-color:var(--accent)}
+.modal textarea{resize:vertical;min-height:80px}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.modal-btns button{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.btn-ghost{background:var(--bg3);color:var(--text2)}
+.btn-primary{background:var(--accent);color:#fff}
 
-.voice-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
-  background: var(--bg2);
-  border-radius: 8px;
-  font-size: 13px;
+/* ── API PAGE ── */
+.api-inner{max-width:800px;margin:0 auto;padding:28px 24px}
+.api-inner h2{font-size:22px;font-weight:700;margin-bottom:20px}
+.api-endpoint{
+  padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;
+  font-size:13px;
 }
-.voice-action {
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-.voice-action.join { background: rgba(34,197,94,0.15); color: var(--green); }
-.voice-action.leave { background: rgba(239,68,68,0.15); color: var(--red); }
-.voice-action.mute { background: rgba(234,179,8,0.15); color: var(--yellow); }
+.api-endpoint code.method{color:var(--green);font-weight:700;margin-right:8px}
+.api-endpoint code.path{color:var(--text)}
+.api-endpoint p{font-size:11px;color:var(--text3);margin-top:4px}
 
-.presence-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
-  background: var(--bg2);
-  border-radius: 8px;
-  font-size: 13px;
-}
-.status-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.status-dot.online { background: var(--green); }
-.status-dot.idle { background: var(--yellow); }
-.status-dot.dnd { background: var(--red); }
-.status-dot.offline { background: var(--text3); }
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 20px;
-}
-.pagination button {
-  padding: 8px 16px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text2);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.pagination button:hover { background: var(--bg4); color: var(--text); }
-.pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
-.pagination span { padding: 8px 12px; font-size: 13px; color: var(--text3); }
-
-/* DOXX PAGE */
-.doxx-page-inner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
-.doxx-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-.doxx-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-}
-.doxx-upload-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s;
-}
-.doxx-upload-btn:hover { background: var(--accent2); }
-.doxx-upload-btn svg { width: 16px; height: 16px; }
-.doxx-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-.doxx-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  cursor: pointer;
-  transition: border-color .15s, transform .15s;
-}
-.doxx-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-.doxx-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.doxx-card-avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--bg3);
-}
-.doxx-card-name {
-  font-weight: 600;
-  font-size: 15px;
-}
-.doxx-card-id {
-  font-size: 11px;
-  color: var(--text3);
-  font-family: monospace;
-}
-.doxx-card-body {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.5;
-}
-.doxx-card-body .field {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--border);
-}
-.doxx-card-body .field:last-child { border-bottom: none; }
-.doxx-card-body .field .k { color: var(--text3); }
-.doxx-card-body .field .v { color: var(--text); font-weight: 500; }
-.doxx-card-footer {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.doxx-card-date { font-size: 11px; color: var(--text3); }
-.doxx-card-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(239,68,68,0.15);
-  color: var(--red);
-}
-
-/* DOXX MODAL */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-}
-.modal-overlay.visible { display: flex; }
-.modal {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 520px;
-  padding: 24px;
-}
-.modal h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-.modal label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  margin-bottom: 6px;
-  margin-top: 14px;
-}
-.modal input, .modal textarea {
-  width: 100%;
-  padding: 10px 14px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-  font-family: inherit;
-}
-.modal input:focus, .modal textarea:focus { border-color: var(--accent); }
-.modal textarea { resize: vertical; min-height: 80px; }
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.modal-actions button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-}
-.btn-cancel {
-  background: var(--bg3);
-  color: var(--text2);
-}
-.btn-submit {
-  background: var(--accent);
-  color: #fff;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text3);
-}
-.empty-state svg {
-  width: 48px; height: 48px;
-  margin-bottom: 16px;
-  opacity: 0.3;
-}
-.empty-state p { font-size: 14px; }
-
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: var(--text3);
-}
-.spinner {
-  width: 24px; height: 24px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .6s linear infinite;
-  margin: 0 auto 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 768px) {
-  .sidebar { display: none; }
-  .content { margin-left: 0; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .lookup-hero h1 { font-size: 28px; }
-  .feature-tabs { gap: 12px; flex-wrap: wrap; }
-  .doxx-grid { grid-template-columns: 1fr; }
-  .topbar-brand { width: auto; }
+@media(max-width:768px){
+  .sidebar{display:none}.content{margin-left:0}#particles{left:0}
+  .p-stats{flex-wrap:wrap;gap:8px;margin-left:0;margin-top:16px}
+  .profile-head{flex-direction:column;text-align:center}
+  .profile-layout{flex-direction:column}
+  .profile-sidebar{width:100%;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:0 0 10px}
+  .profile-main{padding-left:0;padding-top:16px}
+  .doxx-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-
 <canvas id="particles"></canvas>
 
+<!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-brand">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M1 12h6m6 0h6"/><path d="m4.22 4.22 4.24 4.24m7.08 7.08 4.24 4.24M4.22 19.78l4.24-4.24m7.08-7.08 4.24-4.24"/></svg>
-    Eyes Intelligence
-  </div>
   <div class="topbar-nav">
-    <a href="#" class="active" data-page="lookup">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      Lookup
-    </a>
-    <a href="#" data-page="doxx">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
-      Doxx Files
-    </a>
-    <a href="#" data-page="api">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
-      API
-    </a>
+    <a href="#" class="active" data-page="lookup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
+    <a href="#" data-page="lookup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Lookup</a>
+    <a href="#" data-page="doxx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>My Files</a>
+    <a href="#" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>API Docs</a>
+    <a href="#" data-page="plans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12z"/></svg>Plans</a>
   </div>
   <div class="topbar-right">
-    <div class="user-badge">E</div>
+    <div class="credits"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>954</div>
+    <div class="user-pill"><div class="av">E</div><span>Eyes</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--text3)"><path d="m6 9 6 6 6-6"/></svg></div>
   </div>
 </div>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sidebar-section">
-    <div class="sidebar-section-title">Intelligence</div>
-    <div class="sidebar-item active" data-tool="discord">
-      <div class="sidebar-icon discord">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-      </div>
-      <div class="sidebar-item-text">
-        <h4>Discord</h4>
-        <p>User tracking & OSINT</p>
-      </div>
-    </div>
-    <div class="sidebar-item" data-tool="recon">
-      <div class="sidebar-icon recon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-      </div>
-      <div class="sidebar-item-text">
-        <h4>Recon</h4>
-        <p>Deep reconnaissance</p>
-      </div>
-    </div>
-    <div class="sidebar-item" data-tool="threat">
-      <div class="sidebar-icon threat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4m0 4h.01"/></svg>
-      </div>
-      <div class="sidebar-item-text">
-        <h4>Threat</h4>
-        <p>Threat intelligence</p>
-      </div>
-    </div>
-    <div class="sidebar-item" data-tool="surveillance">
-      <div class="sidebar-icon surveillance">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-      </div>
-      <div class="sidebar-item-text">
-        <h4>Surveillance</h4>
-        <p>Real-time monitoring</p>
-      </div>
-    </div>
+  <div class="brand">
+    <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M1 12h6m6 0h6"/></svg></div>
+    <div class="brand-text"><h3>Eyes</h3><p>Intelligence</p></div>
   </div>
 
-  <div class="sidebar-section">
-    <div class="sidebar-section-title">Tools</div>
-    <div class="sidebar-item" data-tool="doxx">
-      <div class="sidebar-icon doxx">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
-      </div>
-      <div class="sidebar-item-text">
-        <h4>Doxx Files</h4>
-        <p>Upload & browse dossiers</p>
-      </div>
-    </div>
+  <div class="sb-cat">Intelligence</div>
+  <div class="sb-item active" data-tool="discord">
+    <div class="sb-icon i-discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg></div>
+    Discord
+  </div>
+  <div class="sb-item" data-tool="recon">
+    <div class="sb-icon i-recon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+    Recon
+  </div>
+  <div class="sb-item" data-tool="threat">
+    <div class="sb-icon i-threat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4m0 4h.01"/></svg></div>
+    Threat
+  </div>
+  <div class="sb-item" data-tool="surv">
+    <div class="sb-icon i-surv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+    Surveillance
+  </div>
+
+  <div class="sb-cat">Tools</div>
+  <div class="sb-item" data-tool="doxx" onclick="showPage('doxx')">
+    <div class="sb-icon i-doxx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
+    Doxx Files
+  </div>
+
+  <div class="sb-cat" style="margin-top:8px">More Tools</div>
+  <div class="sb-btn" onclick="showPage('lookup');resetSearch()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    New Search
   </div>
 
   <div class="sidebar-bottom">
-    <a href="https://t.me/terraborncord" target="_blank">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.63 3.72-.53.37-1.01.55-1.44.54-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.99-1.74 6.65-2.89 7.99-3.45 3.81-1.58 4.6-1.86 5.12-1.87.11 0 .37.03.54.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg>
-      Telegram
-    </a>
+    <a href="https://t.me/terraborncord" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.07.07 0 0 0-.07-.2c-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.63 3.72-.53.37-1.01.55-1.44.54-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.99-1.74 6.65-2.89 7.99-3.45 3.81-1.58 4.6-1.86 5.12-1.87.11 0 .37.03.54.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg></a>
+    <span class="ver">v2.0</span>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
   </div>
 </div>
 
+<!-- CONTENT -->
 <div class="content">
-  <!-- LOOKUP PAGE -->
+
+  <!-- LOOKUP -->
   <div class="page active" id="page-lookup">
-    <div class="lookup-hero">
+    <div class="lookup-center" id="lookupHome">
       <h1>Intelligence Lookup</h1>
-      <p>Deep analysis by Discord User ID</p>
-      <div class="search-container">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p class="sub">Deep analysis by Discord User ID</p>
+      <div class="search-bar">
+        <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="searchInput" placeholder="Enter User ID or username...">
-        <button onclick="doSearch()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-        </button>
+        <button onclick="doSearch()">Search</button>
       </div>
-      <div class="feature-tabs">
-        <div class="feature-tab active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Voice Friends</span>
-        </div>
-        <div class="feature-tab">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Message History</span>
-        </div>
-        <div class="feature-tab">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
-          <span>Server Tracking</span>
-        </div>
-        <div class="feature-tab">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span>Name History</span>
-        </div>
+      <div class="feat-tabs">
+        <div class="feat-tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Voice Friends</span></div>
+        <div class="feat-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Message History</span></div>
+        <div class="feat-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>Server Tracking</span></div>
+        <div class="feat-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Name History</span></div>
       </div>
     </div>
 
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="num" id="statUsers">—</div><div class="label">Users Tracked</div></div>
-      <div class="stat-card"><div class="num" id="statMsgs">—</div><div class="label">Messages</div></div>
-      <div class="stat-card"><div class="num" id="statVoice">—</div><div class="label">Voice Events</div></div>
-      <div class="stat-card"><div class="num" id="statServers">—</div><div class="label">Servers</div></div>
-    </div>
-
-    <div class="profile-section" id="profileSection">
-      <div class="profile-header">
-        <img class="profile-avatar" id="profileAvatar" src="" alt="">
-        <div class="profile-info">
-          <h2 id="profileName">—</h2>
-          <div class="uid" id="profileId">—</div>
-          <div class="profile-stats">
-            <div class="profile-stat"><div class="val" id="pMsgs">0</div><div class="lbl">Messages</div></div>
-            <div class="profile-stat"><div class="val" id="pServers">0</div><div class="lbl">Servers</div></div>
-            <div class="profile-stat"><div class="val" id="pNames">0</div><div class="lbl">Names</div></div>
-          </div>
+    <div class="profile-page" id="profilePage">
+      <div class="profile-head">
+        <img class="p-avatar" id="pAvatar" src="">
+        <div class="p-info">
+          <h2 id="pName">—</h2>
+          <div class="p-display" id="pDisplay"></div>
+          <div class="p-id"><span id="pId">—</span><button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('pId').textContent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+          <div class="p-badges" id="pBadges"></div>
         </div>
+        <div class="p-stats" id="pStats"></div>
       </div>
 
-      <div class="profile-tabs">
-        <div class="profile-tab active" data-tab="messages">Messages</div>
-        <div class="profile-tab" data-tab="names">Names</div>
-        <div class="profile-tab" data-tab="avatars">Avatars</div>
-        <div class="profile-tab" data-tab="servers">Servers</div>
-        <div class="profile-tab" data-tab="voice">Voice</div>
-        <div class="profile-tab" data-tab="status">Status</div>
-        <div class="profile-tab" data-tab="events">Events</div>
+      <div class="p-actions">
+        <div class="p-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export Data</div>
       </div>
 
-      <div class="tab-content active" id="tab-messages"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-      <div class="tab-content" id="tab-names"></div>
-      <div class="tab-content" id="tab-avatars"></div>
-      <div class="tab-content" id="tab-servers"></div>
-      <div class="tab-content" id="tab-voice"></div>
-      <div class="tab-content" id="tab-status"></div>
-      <div class="tab-content" id="tab-events"></div>
+      <div class="profile-layout">
+        <div class="profile-sidebar" id="profileSidebar"></div>
+        <div class="profile-main" id="profileMain"></div>
+      </div>
     </div>
   </div>
 
-  <!-- DOXX PAGE -->
+  <!-- DOXX -->
   <div class="page" id="page-doxx">
-    <div class="doxx-page-inner">
-      <div class="doxx-header">
+    <div class="doxx-inner">
+      <div class="doxx-top">
         <h2>Doxx Files</h2>
-        <button class="doxx-upload-btn" onclick="openDoxxModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
-          Upload Doxx
-        </button>
+        <button class="doxx-add" onclick="openModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>Upload Doxx</button>
       </div>
       <div class="doxx-grid" id="doxxGrid"></div>
-      <div class="empty-state" id="doxxEmpty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
-        <p>No doxx files yet. Upload one to get started.</p>
-      </div>
+      <div class="empty-msg" id="doxxEmpty">No doxx files yet. Upload one to get started.</div>
     </div>
   </div>
 
-  <!-- API PAGE -->
+  <!-- API -->
   <div class="page" id="page-api">
-    <div class="doxx-page-inner">
-      <h2 style="margin-bottom: 20px;">API Documentation</h2>
-      <div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
-        <p style="color: var(--text2); margin-bottom: 16px;">Base URL: <code style="background: var(--bg3); padding: 4px 8px; border-radius: 4px; font-size: 13px;">http://158.101.169.219/spy/</code></p>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/stats?key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">Global statistics</p>
-          </div>
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/user?id=USER_ID&key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">Full user profile — names, messages, servers, voice, status</p>
-          </div>
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/messages?id=USER_ID&page=N&key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">User messages (paginated, 50/page)</p>
-          </div>
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/search?q=TEXT&page=N&key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">Search message content</p>
-          </div>
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/deleted?page=N&key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">Deleted messages</p>
-          </div>
-          <div style="padding: 14px; background: var(--bg3); border-radius: 8px;">
-            <code style="color: var(--green);">GET</code> <code>/spy/username-search?q=NAME&key=KEY</code>
-            <p style="font-size: 12px; color: var(--text3); margin-top: 4px;">Search by username</p>
-          </div>
-        </div>
-      </div>
+    <div class="api-inner">
+      <h2>API Documentation</h2>
+      <p style="color:var(--text2);margin-bottom:20px;font-size:14px">Base: <code style="background:var(--bg3);padding:3px 8px;border-radius:4px">http://158.101.169.219/spy/</code></p>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/stats?key=KEY</code><p>Global statistics</p></div>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/user?id=USER_ID&key=KEY</code><p>Full user profile</p></div>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/messages?id=USER_ID&page=N&key=KEY</code><p>Paginated messages (50/page)</p></div>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/search?q=TEXT&page=N&key=KEY</code><p>Search message content</p></div>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/deleted?page=N&key=KEY</code><p>Deleted messages</p></div>
+      <div class="api-endpoint"><code class="method">GET</code><code class="path">/spy/username-search?q=NAME&key=KEY</code><p>Search by username</p></div>
     </div>
+  </div>
+
+  <div class="page" id="page-plans">
+    <div class="api-inner"><h2>Plans</h2><p style="color:var(--text2)">Coming soon.</p></div>
   </div>
 </div>
 
-<!-- DOXX UPLOAD MODAL -->
-<div class="modal-overlay" id="doxxModal">
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
   <div class="modal">
     <h3>Upload Doxx</h3>
-    <label>Target Name</label>
-    <input type="text" id="doxxName" placeholder="Discord username or real name">
-    <label>User ID (optional)</label>
-    <input type="text" id="doxxUid" placeholder="Discord User ID">
-    <label>Information</label>
-    <textarea id="doxxInfo" placeholder="Full name, IP, phone, email, address, socials..."></textarea>
-    <label>Tags</label>
-    <input type="text" id="doxxTags" placeholder="e.g. scammer, toxic, leaker">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeDoxxModal()">Cancel</button>
-      <button class="btn-submit" onclick="saveDoxx()">Upload</button>
-    </div>
+    <label>Target Name</label><input id="dName" placeholder="Username or real name">
+    <label>User ID</label><input id="dUid" placeholder="Discord ID (optional)">
+    <label>Information</label><textarea id="dInfo" placeholder="Name, IP, phone, email, address, socials..."></textarea>
+    <label>Tags</label><input id="dTags" placeholder="scammer, toxic, leaker">
+    <div class="modal-btns"><button class="btn-ghost" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="saveDoxx()">Upload</button></div>
   </div>
 </div>
 
 <script>
-const API = 'http://158.101.169.219/spy';
-const KEY = 'terranova2026';
-let currentUserId = null;
+const API='http://158.101.169.219/spy',KEY='terranova2026';
+let currentUid=null;
 
-function fmt(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return String(n);
+const profileTabs=[
+  {id:'overview',label:'Overview',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'},
+  {id:'servers',label:'Servers',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>'},
+  {id:'voice',label:'Voice',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>'},
+  {id:'messages',label:'Messages',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'},
+  {id:'names',label:'History',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'},
+  {id:'avatars',label:'Media',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'},
+];
+
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(n)}
+function ts(e){const d=new Date(e);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+async function api(ep){const s=ep.includes('?')?'&':'?';const r=await fetch(`${API}${ep}${s}key=${KEY}`);return r.json()}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.topbar-nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector(`[data-page="${p}"]`)?.classList.add('active');
+}
+document.querySelectorAll('[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showPage(a.dataset.page)}));
+
+function resetSearch(){
+  document.getElementById('profilePage').classList.remove('visible');
+  document.getElementById('lookupHome').style.display='';
+  document.getElementById('searchInput').value='';
 }
 
-function ts(epoch) {
-  const d = new Date(epoch);
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }) + ' ' +
-         d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-}
-
-async function api(endpoint) {
-  const sep = endpoint.includes('?') ? '&' : '?';
-  const r = await fetch(`${API}${endpoint}${sep}key=${KEY}`);
-  return r.json();
-}
-
-async function loadStats() {
-  try {
-    const s = await api('/stats');
-    document.getElementById('statUsers').textContent = fmt(s.totalUsers);
-    document.getElementById('statMsgs').textContent = fmt(s.totalMsgs);
-    document.getElementById('statVoice').textContent = fmt(s.totalVoice);
-    document.getElementById('statServers').textContent = fmt(s.totalServers);
-  } catch {}
-}
-
-async function doSearch() {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!q) return;
-  const profile = document.getElementById('profileSection');
-  profile.classList.add('visible');
-  document.getElementById('tab-messages').innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-
-  let uid = q;
-  if (!/^\d{17,20}$/.test(q)) {
-    try {
-      const res = await api('/username-search?q=' + encodeURIComponent(q));
-      if (res.users && res.users.length > 0) {
-        uid = res.users[0].user_id;
-      } else {
-        profile.classList.remove('visible');
-        return;
-      }
-    } catch { return; }
+async function doSearch(){
+  const q=document.getElementById('searchInput').value.trim();
+  if(!q)return;
+  let uid=q;
+  if(!/^\d{17,20}$/.test(q)){
+    try{const r=await api('/username-search?q='+encodeURIComponent(q));if(r.users?.length)uid=r.users[0].user_id;else return;}catch{return}
   }
+  currentUid=uid;
+  document.getElementById('lookupHome').style.display='none';
+  const pp=document.getElementById('profilePage');
+  pp.classList.add('visible');
+  pp.querySelector('.profile-main').innerHTML='<div class="spinner"></div>';
 
-  currentUserId = uid;
-  try {
-    const data = await api('/user?id=' + uid);
-    const latest = data.nameHistory?.[0];
-    document.getElementById('profileName').textContent = latest?.display_name || latest?.username || uid;
-    document.getElementById('profileId').textContent = uid;
-    document.getElementById('pMsgs').textContent = fmt(data.totalMessages || 0);
-    document.getElementById('pServers').textContent = data.servers?.length || 0;
-    document.getElementById('pNames').textContent = data.nameHistory?.length || 0;
+  try{
+    const d=await api('/user?id='+uid);
+    const latest=d.nameHistory?.[0];
+    document.getElementById('pName').textContent=latest?.username||uid;
+    document.getElementById('pDisplay').textContent=latest?.display_name||'';
+    document.getElementById('pId').textContent=uid;
 
-    const avHash = latest?.avatar_hash;
-    const avEl = document.getElementById('profileAvatar');
-    if (avHash) {
-      const ext = avHash.startsWith('a_') ? 'gif' : 'png';
-      avEl.src = `https://cdn.discordapp.com/avatars/${uid}/${avHash}.${ext}?size=128`;
-      avEl.onerror = () => { avEl.src = `${API}/avatar/${uid}/${avHash}?key=${KEY}`; };
-    } else {
-      avEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(uid) % 5}.png`;
+    const avHash=latest?.avatar_hash;
+    const avEl=document.getElementById('pAvatar');
+    if(avHash){
+      const ext=avHash.startsWith('a_')?'gif':'png';
+      avEl.src=`https://cdn.discordapp.com/avatars/${uid}/${avHash}.${ext}?size=128`;
+      avEl.onerror=()=>{avEl.src=`${API}/avatar/${uid}/${avHash}?key=${KEY}`};
+    }else{avEl.src=`https://cdn.discordapp.com/embed/avatars/${parseInt(uid)%5}.png`}
+
+    document.getElementById('pStats').innerHTML=`
+      <div class="p-stat-box"><div class="num">${d.servers?.length||0}</div><div class="lbl">Servers</div></div>
+      <div class="p-stat-box"><div class="num">${fmt(d.totalMessages||0)}</div><div class="lbl">Messages</div></div>
+      <div class="p-stat-box"><div class="num">${d.voiceLog?.length||0}</div><div class="lbl">Voice Events</div></div>
+      <div class="p-stat-box"><div class="num">${d.nameHistory?.length||0}</div><div class="lbl">Names</div></div>
+    `;
+
+    const sb=document.getElementById('profileSidebar');
+    sb.innerHTML=profileTabs.map((t,i)=>`<button class="ps-btn${i===0?' active':''}" data-ptab="${t.id}">${t.icon}${t.label}</button>`).join('');
+    sb.querySelectorAll('.ps-btn').forEach(b=>b.addEventListener('click',()=>{
+      sb.querySelectorAll('.ps-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      renderTab(b.dataset.ptab,d);
+    }));
+
+    renderTab('overview',d);
+  }catch(e){pp.querySelector('.profile-main').innerHTML='<div class="empty-msg">Failed to load user data.</div>'}
+}
+
+function renderTab(tab,d){
+  const el=document.getElementById('profileMain');
+  if(tab==='overview'){
+    let html='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview</div>';
+    html+='<p style="color:var(--text2);font-size:14px;margin-bottom:20px">Tracking data for this user across all monitored servers.</p>';
+    if(d.recentMessages?.length){
+      html+='<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Recent Messages</div>';
+      html+=d.recentMessages.slice(0,5).map(m=>`<div class="msg-item"><span class="msg-time">${ts(m.created_at)}</span>${m.guild_name?`<span class="msg-guild">${esc(m.guild_name)}</span>`:''}  <span class="msg-text">${esc(m.content||'')}</span></div>`).join('');
     }
-
-    renderMessages(data.recentMessages);
-    renderNames(data.nameHistory);
-    renderAvatars(uid, data.nameHistory);
-    renderServers(data.servers);
-    renderVoice(data.voiceLog);
-    renderPresence(data.presenceLog);
-    renderEvents(data.guildEvents);
-  } catch {}
+    el.innerHTML=html;
+  }else if(tab==='servers'){
+    if(!d.servers?.length){el.innerHTML='<div class="empty-msg">No servers tracked.</div>';return}
+    el.innerHTML='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>Servers</div>'+
+      d.servers.map(s=>`<div class="data-row"><span class="name">${esc(s.guild_name||s.guild_id)}</span><span class="meta">Last seen: ${ts(s.last_seen)}</span></div>`).join('');
+  }else if(tab==='voice'){
+    if(!d.voiceLog?.length){el.innerHTML='<div class="empty-msg">No voice events.</div>';return}
+    el.innerHTML='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/></svg>Voice Log</div>'+
+      d.voiceLog.map(v=>`<div class="data-row"><span class="voice-tag ${v.action}">${v.action}</span><span class="meta" style="margin-left:auto">${ts(v.timestamp)}</span></div>`).join('');
+  }else if(tab==='messages'){
+    if(!d.recentMessages?.length){el.innerHTML='<div class="empty-msg">No messages.</div>';return}
+    el.innerHTML='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages</div>'+
+      d.recentMessages.map(m=>`<div class="msg-item"><span class="msg-time">${ts(m.created_at)}</span>${m.guild_name?`<span class="msg-guild">${esc(m.guild_name)}</span>`:''}<span class="msg-text">${esc(m.content||'')}</span></div>`).join('');
+  }else if(tab==='names'){
+    if(!d.nameHistory?.length){el.innerHTML='<div class="empty-msg">No name history.</div>';return}
+    el.innerHTML='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Name History</div>'+
+      d.nameHistory.map(n=>`<div class="data-row"><span class="name">${esc(n.username)}</span>${n.display_name?`<span class="meta">${esc(n.display_name)}</span>`:''}<span class="meta" style="margin-left:auto">${ts(n.changed_at)}</span></div>`).join('');
+  }else if(tab==='avatars'){
+    const seen=new Set();
+    const unique=(d.nameHistory||[]).filter(n=>{if(!n.avatar_hash||seen.has(n.avatar_hash))return false;seen.add(n.avatar_hash);return true});
+    if(!unique.length){el.innerHTML='<div class="empty-msg">No avatars.</div>';return}
+    el.innerHTML='<div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Avatars</div><div class="avatar-grid">'+
+      unique.map(n=>{
+        const ext=n.avatar_hash.startsWith('a_')?'gif':'png';
+        const cdn=`https://cdn.discordapp.com/avatars/${currentUid}/${n.avatar_hash}.${ext}?size=256`;
+        const local=`${API}/avatar/${currentUid}/${n.avatar_hash}?key=${KEY}`;
+        return`<img src="${cdn}" onerror="this.src='${local}'" onclick="window.open(this.src)">`;
+      }).join('')+'</div>';
+  }
 }
 
-function renderMessages(msgs) {
-  const el = document.getElementById('tab-messages');
-  if (!msgs || !msgs.length) { el.innerHTML = '<div class="empty-state"><p>No messages found</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + msgs.map(m =>
-    `<div class="msg-item">
-      <span class="msg-time">${ts(m.created_at)}</span>
-      ${m.guild_name ? `<span class="msg-guild">${esc(m.guild_name)}</span>` : ''}
-      <span class="msg-content">${esc(m.content || '')}</span>
-    </div>`
-  ).join('') + '</div>';
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+
+// DOXX
+let doxxFiles=[];try{doxxFiles=JSON.parse(localStorage.getItem('doxxFiles')||'[]')}catch{}
+function renderDoxxList(){
+  const g=document.getElementById('doxxGrid'),em=document.getElementById('doxxEmpty');
+  if(!doxxFiles.length){g.innerHTML='';em.style.display='';return}
+  em.style.display='none';
+  g.innerHTML=doxxFiles.map((d,i)=>{
+    const fields=d.info.split('\n').filter(l=>l.includes(':')).slice(0,4);
+    return`<div class="doxx-card" onclick="alert('${esc(d.name)}\\n${d.uid?'ID: '+d.uid+'\\n':''}\\n'+decodeURIComponent('${encodeURIComponent(d.info)}'))">
+      <h4>${esc(d.name)}</h4>${d.uid?`<div class="dc-id">${esc(d.uid)}</div>`:''}
+      ${fields.map(f=>{const[k,...v]=f.split(':');return`<div class="dc-field"><span class="k">${esc(k.trim())}</span><span class="v">${esc(v.join(':').trim())}</span></div>`}).join('')}
+      <div class="dc-foot"><span>${new Date(d.date).toLocaleDateString()}</span>${d.tags?`<span class="dc-tag">${esc(d.tags.split(',')[0].trim())}</span>`:''}</div>
+    </div>`}).join('');
 }
-
-function renderNames(names) {
-  const el = document.getElementById('tab-names');
-  if (!names || !names.length) { el.innerHTML = '<div class="empty-state"><p>No name changes</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + names.map(n =>
-    `<div class="name-item">
-      <span class="new">${esc(n.username)}</span>
-      ${n.display_name ? `<span class="old">(${esc(n.display_name)})</span>` : ''}
-      <span class="date">${ts(n.changed_at)}</span>
-    </div>`
-  ).join('') + '</div>';
-}
-
-function renderAvatars(uid, names) {
-  const el = document.getElementById('tab-avatars');
-  if (!names) { el.innerHTML = '<div class="empty-state"><p>No avatars</p></div>'; return; }
-  const seen = new Set();
-  const unique = names.filter(n => {
-    if (!n.avatar_hash || seen.has(n.avatar_hash)) return false;
-    seen.add(n.avatar_hash);
-    return true;
-  });
-  if (!unique.length) { el.innerHTML = '<div class="empty-state"><p>No avatars</p></div>'; return; }
-  el.innerHTML = '<div class="avatar-grid">' + unique.map(n => {
-    const ext = n.avatar_hash.startsWith('a_') ? 'gif' : 'png';
-    const cdn = `https://cdn.discordapp.com/avatars/${uid}/${n.avatar_hash}.${ext}?size=256`;
-    const local = `${API}/avatar/${uid}/${n.avatar_hash}?key=${KEY}`;
-    return `<img src="${cdn}" onerror="this.src='${local}'" onclick="window.open(this.src)">`;
-  }).join('') + '</div>';
-}
-
-function renderServers(servers) {
-  const el = document.getElementById('tab-servers');
-  if (!servers || !servers.length) { el.innerHTML = '<div class="empty-state"><p>No servers</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + servers.map(s =>
-    `<div class="server-item">
-      <span class="sname">${esc(s.guild_name || s.guild_id)}</span>
-      <span class="seen">Last seen: ${ts(s.last_seen)}</span>
-    </div>`
-  ).join('') + '</div>';
-}
-
-function renderVoice(voice) {
-  const el = document.getElementById('tab-voice');
-  if (!voice || !voice.length) { el.innerHTML = '<div class="empty-state"><p>No voice events</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + voice.map(v => {
-    const cls = v.action === 'join' ? 'join' : v.action === 'leave' ? 'leave' : 'mute';
-    return `<div class="voice-item">
-      <span class="voice-action ${cls}">${v.action}</span>
-      <span>${ts(v.timestamp)}</span>
-    </div>`;
-  }).join('') + '</div>';
-}
-
-function renderPresence(pres) {
-  const el = document.getElementById('tab-status');
-  if (!pres || !pres.length) { el.innerHTML = '<div class="empty-state"><p>No status data</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + pres.map(p =>
-    `<div class="presence-item">
-      <span class="status-dot ${p.status}"></span>
-      <span>${p.status}</span>
-      ${p.activity_name ? `<span style="color:var(--text3)">— ${esc(p.activity_name)}</span>` : ''}
-      <span style="margin-left:auto;font-size:11px;color:var(--text3)">${ts(p.timestamp)}</span>
-    </div>`
-  ).join('') + '</div>';
-}
-
-function renderEvents(events) {
-  const el = document.getElementById('tab-events');
-  if (!events || !events.length) { el.innerHTML = '<div class="empty-state"><p>No events</p></div>'; return; }
-  el.innerHTML = '<div class="msg-list">' + events.map(e => {
-    const cls = e.event === 'join' ? 'join' : 'leave';
-    return `<div class="voice-item">
-      <span class="voice-action ${cls}">${e.event}</span>
-      <span>${esc(e.guild_name || e.guild_id)}</span>
-      <span style="margin-left:auto;font-size:11px;color:var(--text3)">${ts(e.timestamp)}</span>
-    </div>`;
-  }).join('') + '</div>';
-}
-
-function esc(s) {
-  if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-// PAGE NAVIGATION
-document.querySelectorAll('[data-page]').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const page = a.dataset.page;
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    document.querySelectorAll('.topbar-nav a').forEach(n => n.classList.remove('active'));
-    a.classList.add('active');
-  });
-});
-
-// PROFILE TABS
-document.querySelectorAll('.profile-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-  });
-});
-
-// SEARCH ON ENTER
-document.getElementById('searchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
-});
-
-// DOXX SYSTEM (localStorage)
-let doxxFiles = JSON.parse(localStorage.getItem('doxxFiles') || '[]');
-
-function renderDoxx() {
-  const grid = document.getElementById('doxxGrid');
-  const empty = document.getElementById('doxxEmpty');
-  if (!doxxFiles.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  grid.innerHTML = doxxFiles.map((d, i) => {
-    const fields = d.info.split('\n').filter(l => l.includes(':')).slice(0, 4);
-    return `<div class="doxx-card" onclick="viewDoxx(${i})">
-      <div class="doxx-card-header">
-        <div class="doxx-card-avatar"></div>
-        <div>
-          <div class="doxx-card-name">${esc(d.name)}</div>
-          ${d.uid ? `<div class="doxx-card-id">${esc(d.uid)}</div>` : ''}
-        </div>
-      </div>
-      <div class="doxx-card-body">
-        ${fields.map(f => {
-          const [k, ...v] = f.split(':');
-          return `<div class="field"><span class="k">${esc(k.trim())}</span><span class="v">${esc(v.join(':').trim())}</span></div>`;
-        }).join('')}
-      </div>
-      <div class="doxx-card-footer">
-        <span class="doxx-card-date">${new Date(d.date).toLocaleDateString()}</span>
-        ${d.tags ? `<span class="doxx-card-tag">${esc(d.tags.split(',')[0].trim())}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openDoxxModal() { document.getElementById('doxxModal').classList.add('visible'); }
-function closeDoxxModal() { document.getElementById('doxxModal').classList.remove('visible'); }
-
-function saveDoxx() {
-  const name = document.getElementById('doxxName').value.trim();
-  const uid = document.getElementById('doxxUid').value.trim();
-  const info = document.getElementById('doxxInfo').value.trim();
-  const tags = document.getElementById('doxxTags').value.trim();
-  if (!name || !info) return;
-  doxxFiles.unshift({ name, uid, info, tags, date: Date.now() });
-  localStorage.setItem('doxxFiles', JSON.stringify(doxxFiles));
-  closeDoxxModal();
-  renderDoxx();
-  document.getElementById('doxxName').value = '';
-  document.getElementById('doxxUid').value = '';
-  document.getElementById('doxxInfo').value = '';
-  document.getElementById('doxxTags').value = '';
-}
-
-function viewDoxx(i) {
-  const d = doxxFiles[i];
-  alert(`${d.name}\n${d.uid ? 'ID: ' + d.uid + '\n' : ''}\n${d.info}\n\nTags: ${d.tags || 'none'}`);
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function saveDoxx(){
+  const n=document.getElementById('dName').value.trim(),u=document.getElementById('dUid').value.trim(),
+        i=document.getElementById('dInfo').value.trim(),t=document.getElementById('dTags').value.trim();
+  if(!n||!i)return;
+  doxxFiles.unshift({name:n,uid:u,info:i,tags:t,date:Date.now()});
+  localStorage.setItem('doxxFiles',JSON.stringify(doxxFiles));
+  closeModal();renderDoxxList();
+  document.getElementById('dName').value='';document.getElementById('dUid').value='';
+  document.getElementById('dInfo').value='';document.getElementById('dTags').value='';
 }
 
 // PARTICLES
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let particles = [];
-
-function initParticles() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  particles = [];
-  const count = Math.floor((canvas.width * canvas.height) / 15000);
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.5 + 0.5,
-      a: Math.random() * 0.3 + 0.1
-    });
-  }
+const cv=document.getElementById('particles'),cx=cv.getContext('2d');let pts=[];
+function initP(){
+  cv.width=window.innerWidth-200;cv.height=window.innerHeight;pts=[];
+  const n=Math.floor((cv.width*cv.height)/18000);
+  for(let i=0;i<n;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.4,a:Math.random()*.25+.08});
 }
-
-function drawParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (const p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < 0) p.x = canvas.width;
-    if (p.x > canvas.width) p.x = 0;
-    if (p.y < 0) p.y = canvas.height;
-    if (p.y > canvas.height) p.y = 0;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(139, 92, 246, ${p.a})`;
-    ctx.fill();
+function drawP(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  for(const p of pts){
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=cv.width;if(p.x>cv.width)p.x=0;
+    if(p.y<0)p.y=cv.height;if(p.y>cv.height)p.y=0;
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(139,92,246,${p.a})`;cx.fill();
   }
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 120) {
-        ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(139, 92, 246, ${0.06 * (1 - dist / 120)})`;
-        ctx.stroke();
-      }
-    }
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+    const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<100){cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.strokeStyle=`rgba(139,92,246,${.05*(1-dist/100)})`;cx.stroke()}
   }
-  requestAnimationFrame(drawParticles);
+  requestAnimationFrame(drawP);
 }
-
-window.addEventListener('resize', initParticles);
-initParticles();
-drawParticles();
-loadStats();
-renderDoxx();
+window.addEventListener('resize',initP);initP();drawP();
+renderDoxxList();
 </script>
 </body>
 </html>
