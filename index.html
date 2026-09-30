@@ -117,34 +117,10 @@ button{font-family:inherit;cursor:pointer}
 .content{margin-left:156px;margin-top:44px;position:relative;z-index:1;min-height:calc(100vh - 44px)}
 .page{display:none}.page.active{display:block}
 
-/* BACKGROUND — subtle light streaks */
-.bg-effect{
+/* BACKGROUND — canvas animated particles */
+#bgCanvas{
   position:fixed;top:44px;left:156px;right:0;bottom:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 600px 300px at 70% 80%, rgba(180,160,120,.04), transparent),
-    radial-gradient(ellipse 400px 200px at 30% 60%, rgba(150,140,130,.03), transparent),
-    radial-gradient(ellipse 800px 400px at 60% 90%, rgba(200,180,140,.03), transparent);
 }
-.bg-particles{
-  position:fixed;top:44px;left:156px;right:0;bottom:0;z-index:0;pointer-events:none;
-  overflow:hidden;
-}
-.bg-particles::before{
-  content:'';position:absolute;width:200%;height:200%;top:-50%;left:-50%;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.15), transparent),
-    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.1), transparent),
-    radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,.12), transparent),
-    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,.08), transparent),
-    radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,.1), transparent),
-    radial-gradient(1.5px 1.5px at 15% 55%, rgba(255,255,255,.06), transparent),
-    radial-gradient(1px 1px at 45% 15%, rgba(255,255,255,.1), transparent),
-    radial-gradient(1px 1px at 85% 65%, rgba(255,255,255,.08), transparent),
-    radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,.07), transparent),
-    radial-gradient(1px 1px at 25% 90%, rgba(255,255,255,.09), transparent);
-  animation:drift 120s linear infinite;
-}
-@keyframes drift{to{transform:translate(5%,3%)}}
 
 /* LOOKUP — centered like DSR */
 .lookup-center{
@@ -308,8 +284,7 @@ button{font-family:inherit;cursor:pointer}
 </head>
 <body>
 
-<div class="bg-effect"></div>
-<div class="bg-particles"></div>
+<canvas id="bgCanvas"></canvas>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -550,6 +525,63 @@ function saveDoxx(){
   closeModal();renderDoxx();['dName','dUid','dInfo','dTags'].forEach(id=>document.getElementById(id).value='');
 }
 renderDoxx();
+
+(function(){
+  const cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  window.addEventListener('resize',resize);resize();
+
+  const particles=[];
+  const COUNT=90;
+
+  function spawn(x,y){
+    return{
+      x:x!=null?x:Math.random()*cv.width,
+      y:y!=null?y:Math.random()*cv.height,
+      vx:(Math.random()-.5)*0.4,
+      vy:-Math.random()*0.6-0.1,
+      r:Math.random()*2+0.5,
+      life:Math.random()*300+100,
+      maxLife:0,
+      alpha:Math.random()*0.5+0.15,
+      type:Math.random()<0.3?'spark':'smoke'
+    };
+  }
+  for(let i=0;i<COUNT;i++){const p=spawn();p.maxLife=p.life;particles.push(p)}
+
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;p.y+=p.vy;p.life--;
+      if(p.type==='smoke'){
+        p.vx+=(Math.random()-.5)*0.02;
+        p.r+=0.008;
+      }
+      const fade=Math.min(p.life/40,1)*p.alpha;
+      if(p.life<=0||p.y<-10||p.x<-10||p.x>cv.width+10){
+        const nx=Math.random()*cv.width;
+        const ny=cv.height*0.6+Math.random()*cv.height*0.4;
+        particles[i]=spawn(nx,ny);particles[i].maxLife=particles[i].life;
+        continue;
+      }
+      ctx.beginPath();
+      if(p.type==='spark'){
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,255,255,${fade})`;
+        ctx.fill();
+      }else{
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
+        g.addColorStop(0,`rgba(200,200,200,${fade*0.4})`);
+        g.addColorStop(1,'rgba(200,200,200,0)');
+        ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2);
+        ctx.fillStyle=g;ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 </script>
 </body>
 </html>
