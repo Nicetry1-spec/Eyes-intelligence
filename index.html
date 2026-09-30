@@ -119,7 +119,7 @@ button{font-family:inherit;cursor:pointer}
 
 /* BACKGROUND — canvas animated particles */
 #bgCanvas{
-  position:fixed;top:44px;left:156px;right:0;bottom:0;z-index:0;pointer-events:none;
+  position:fixed;top:44px;left:156px;width:calc(100% - 156px);height:calc(100vh - 44px);z-index:0;pointer-events:none;
 }
 
 /* LOOKUP — centered like DSR */
@@ -528,53 +528,48 @@ renderDoxx();
 
 (function(){
   const cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d');
-  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  function resize(){cv.width=window.innerWidth-156;cv.height=window.innerHeight-44}
   window.addEventListener('resize',resize);resize();
 
   const particles=[];
-  const COUNT=90;
+  const COUNT=120;
 
-  function spawn(x,y){
+  function spawn(full){
+    const isSpark=Math.random()<0.35;
     return{
-      x:x!=null?x:Math.random()*cv.width,
-      y:y!=null?y:Math.random()*cv.height,
-      vx:(Math.random()-.5)*0.4,
-      vy:-Math.random()*0.6-0.1,
-      r:Math.random()*2+0.5,
-      life:Math.random()*300+100,
-      maxLife:0,
-      alpha:Math.random()*0.5+0.15,
-      type:Math.random()<0.3?'spark':'smoke'
+      x:full?Math.random()*cv.width:cv.width*Math.random(),
+      y:full?Math.random()*cv.height:cv.height*(0.5+Math.random()*0.5),
+      vx:Math.random()*0.3+0.1,
+      vy:-(Math.random()*0.3+0.05),
+      r:isSpark?Math.random()*1.5+0.5:Math.random()*3+2,
+      life:Math.random()*400+200,
+      alpha:isSpark?Math.random()*0.6+0.2:Math.random()*0.12+0.03,
+      spark:isSpark
     };
   }
-  for(let i=0;i<COUNT;i++){const p=spawn();p.maxLife=p.life;particles.push(p)}
+  for(let i=0;i<COUNT;i++)particles.push(spawn(true));
 
   function draw(){
     ctx.clearRect(0,0,cv.width,cv.height);
-    for(let i=particles.length-1;i>=0;i--){
+    for(let i=0;i<particles.length;i++){
       const p=particles[i];
       p.x+=p.vx;p.y+=p.vy;p.life--;
-      if(p.type==='smoke'){
-        p.vx+=(Math.random()-.5)*0.02;
-        p.r+=0.008;
-      }
-      const fade=Math.min(p.life/40,1)*p.alpha;
-      if(p.life<=0||p.y<-10||p.x<-10||p.x>cv.width+10){
-        const nx=Math.random()*cv.width;
-        const ny=cv.height*0.6+Math.random()*cv.height*0.4;
-        particles[i]=spawn(nx,ny);particles[i].maxLife=particles[i].life;
-        continue;
+      if(!p.spark){p.vx+=(Math.random()-.5)*0.01;p.r+=0.005}
+      const fade=Math.min(p.life/60,1)*p.alpha;
+      if(p.life<=0||p.x>cv.width+20||p.y<-20){
+        particles[i]=spawn(false);continue;
       }
       ctx.beginPath();
-      if(p.type==='spark'){
+      if(p.spark){
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fillStyle=`rgba(255,255,255,${fade})`;
+        ctx.fillStyle=`rgba(220,210,190,${fade})`;
         ctx.fill();
       }else{
-        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
-        g.addColorStop(0,`rgba(200,200,200,${fade*0.4})`);
-        g.addColorStop(1,'rgba(200,200,200,0)');
-        ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2);
+        const sz=p.r*5;
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,sz);
+        g.addColorStop(0,`rgba(180,170,150,${fade})`);
+        g.addColorStop(1,'rgba(180,170,150,0)');
+        ctx.arc(p.x,p.y,sz,0,Math.PI*2);
         ctx.fillStyle=g;ctx.fill();
       }
     }
